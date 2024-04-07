@@ -1,20 +1,76 @@
 const Photo = require('../models/photo.model');
 const User = require('../models/user.model');
+const multer = require('multer');
+const path = require('path');
 
-const createPhoto = async (req, res) => {
-    const { userId, image, description, location } = req.body;
+
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/'); // Specify the directory to store uploads
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
+      cb(null, uniqueSuffix);
+    }
+  });
+
+const upload = multer({ storage });
+
+  const createPhoto = async (req, res) => {
     try {
+      
+      console.log(req, "bodys")
+  
+      // Use upload middleware to handle image upload
+
+      async function uploadImage(req, res) {
+        return new Promise((resolve, reject) => {
+            upload.single('image')(req, res, (err) => {
+                if (err) {
+
+                    return res.status(400).json({ error: err.message });
+
+                }
+                console.log("file uploaded");
+                resolve(req);
+            });
+        });
+    }
+
+    uploadImage(req, res).then(async (req) => {
+        const { userId, description, location } = req.body;
+        const image = req.file.path; // Access the uploaded image path from req.file
+        
         const photo = await Photo.create({
-            userId,
-            image,
-            description,
-            location
+          userId,
+          image,
+          description,
+          location: JSON.parse(location)
         });
         return res.status(201).json({ photo });
+      });
+
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
-}
+  }
+  
+  
+// const createPhoto = async (req, res) => {
+//     const { userId, image, description, location } = req.body;
+//     try {
+//         const photo = await Photo.create({
+//             userId,
+//             image,
+//             description,
+//             location
+//         });
+//         return res.status(201).json({ photo });
+//     } catch (error) {
+//         return res.status(500).json({ error: error.message });
+//     }
+// }
 
 const getAllPhotos = async (req, res) => {
     try {
@@ -63,7 +119,6 @@ const getAllPhotos = async (req, res) => {
 
     }
 }
-
 
 const getPhoto = async (req, res) => {
     try {
