@@ -17,14 +17,53 @@ const createPhoto = async (req, res) => {
 }
 
 const getAllPhotos = async (req, res) => {
-    console.log('Get all photos');
     try {
+        const { userId, location } = req.query;
+        // console.log(location);
+        if (userId) {
+            const photos = await Photo.find({ userId });
+
+            if (photos.length === 0) {
+                return res.status(404).json({ message: 'No photos found for this user' });
+            }
+
+            return res.status(200).json({ photos });
+        }
+        if (location) {
+            const newlocation = location.split(',').map(parseFloat);
+
+            const photos = await Photo.find({
+                location: {
+                    $near: {
+                        $geometry: {
+                            type: "Point",
+                            coordinates: newlocation
+                        },
+                        $maxDistance: 10000
+                    }
+                }
+            });
+
+            if (photos.length === 0) {
+                return res.status(404).json({ message: 'No photos found for this location' });
+            }
+
+            return res.status(200).json({ photos });
+        }
         const photos = await Photo.find();
+
+        if (photos.length === 0) {
+            return res.status(404).json({ message: 'No photos found' });
+        }
+
         return res.status(200).json({ photos });
+
     } catch (error) {
-        return res.status(500).send(error.message);
+        return res.status(500).json({ error: error.message });
+
     }
 }
+
 
 const getPhoto = async (req, res) => {
     try {

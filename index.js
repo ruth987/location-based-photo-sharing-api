@@ -9,6 +9,7 @@ const auth = require("./middleware/auth");
 const verifyToken = require("./middleware/auth");
 const photoRoute = require('./routes/photo.route.js');
 const authRoute = require('./routes/auth.route.js');
+const userRoute = require('./routes/user.route.js');
 
 
 //middleware
@@ -18,6 +19,7 @@ app.use(express.urlencoded({extended: false}));
 //routes
 app.use('/api/photos', photoRoute);
 app.use('/api/auth', authRoute);
+app.use('/api/users', userRoute);
 
 //for testing the token validator
 
