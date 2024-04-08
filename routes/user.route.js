@@ -14,6 +14,8 @@ router.delete('/:id', auth, deleteUser);
 
 router.put('/:id', auth, updateUser);
 
+router.put('/profilePicture/:id', auth, addProfilePicture);
+
 
 module.exports = router;
 

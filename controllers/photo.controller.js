@@ -2,25 +2,12 @@ const Photo = require('../models/photo.model');
 const User = require('../models/user.model');
 const multer = require('multer');
 const path = require('path');
-
-
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/'); // Specify the directory to store uploads
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
-      cb(null, uniqueSuffix);
-    }
-  });
-
-const upload = multer({ storage });
+const upload = require('../middleware/multer');
 
   const createPhoto = async (req, res) => {
     try {
       
-      console.log(req, "bodys")
+    //   console.log(req, "bodys")
   
       // Use upload middleware to handle image upload
 
@@ -40,7 +27,7 @@ const upload = multer({ storage });
 
     uploadImage(req, res).then(async (req) => {
         const { userId, description, location } = req.body;
-        const image = req.file.path; // Access the uploaded image path from req.file
+        const image = req.file.path; // Get the path of the uploaded image
         
         const photo = await Photo.create({
           userId,
@@ -56,21 +43,6 @@ const upload = multer({ storage });
     }
   }
   
-  
-// const createPhoto = async (req, res) => {
-//     const { userId, image, description, location } = req.body;
-//     try {
-//         const photo = await Photo.create({
-//             userId,
-//             image,
-//             description,
-//             location
-//         });
-//         return res.status(201).json({ photo });
-//     } catch (error) {
-//         return res.status(500).json({ error: error.message });
-//     }
-// }
 
 const getAllPhotos = async (req, res) => {
     try {
